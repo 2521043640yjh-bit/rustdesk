@@ -420,10 +420,6 @@ impl RendezvousMediator {
 
     pub async fn start(server: ServerPtr, host: String) -> ResultType<()> {
         log::info!("start rendezvous mediator of {}", host);
-        if host.starts_with(config::RENDEZVOUS_SERVERS[0]) {
-            log::info!("forcing tcp rendezvous for hardcoded self-host target {}", host);
-            return Self::start_tcp(server, host).await;
-        }
         //If the investment agent type is http or https, then tcp forwarding is enabled.
         if (cfg!(debug_assertions) && option_env!("TEST_TCP").is_some())
             || Config::is_proxy()
