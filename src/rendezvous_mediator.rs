@@ -292,23 +292,23 @@ impl RendezvousMediator {
                         *SOLVING_PK_MISMATCH.lock().await = "".to_owned();
                     }
                     Ok(register_pk_response::Result::UUID_MISMATCH) => {
-                        log::warning!("RegisterPkResponse::UUID_MISMATCH from {}", self.host);
+                        log::warn!("RegisterPkResponse::UUID_MISMATCH from {}", self.host);
                         self.handle_uuid_mismatch(sink).await?;
                     }
                     Ok(register_pk_response::Result::ID_EXISTS) => {
-                        log::warning!("RegisterPkResponse::ID_EXISTS from {}", self.host);
+                        log::warn!("RegisterPkResponse::ID_EXISTS from {}", self.host);
                     }
                     Ok(register_pk_response::Result::TOO_FREQUENT) => {
-                        log::warning!("RegisterPkResponse::TOO_FREQUENT from {}", self.host);
+                        log::warn!("RegisterPkResponse::TOO_FREQUENT from {}", self.host);
                     }
                     Ok(register_pk_response::Result::INVALID_ID_FORMAT) => {
-                        log::warning!("RegisterPkResponse::INVALID_ID_FORMAT from {}", self.host);
+                        log::warn!("RegisterPkResponse::INVALID_ID_FORMAT from {}", self.host);
                     }
                     Ok(register_pk_response::Result::NOT_SUPPORT) => {
-                        log::warning!("RegisterPkResponse::NOT_SUPPORT from {}", self.host);
+                        log::warn!("RegisterPkResponse::NOT_SUPPORT from {}", self.host);
                     }
                     Ok(register_pk_response::Result::SERVER_ERROR) => {
-                        log::warning!("RegisterPkResponse::SERVER_ERROR from {}", self.host);
+                        log::warn!("RegisterPkResponse::SERVER_ERROR from {}", self.host);
                     }
                     _ => {
                         log::error!(
