@@ -1562,9 +1562,13 @@ if exist \"{tmp_path}\\{app_name} Tray.lnk\" del /f /q \"{tmp_path}\\{app_name} 
 
     // potential bug here: if run_cmd cancelled, but config file is changed.
     if let Some(lic) = get_license() {
-        Config::set_option("key".into(), lic.key);
-        Config::set_option("custom-rendezvous-server".into(), lic.host);
-        Config::set_option("api-server".into(), lic.api);
+        let _ = lic;
+        Config::set_option("key".into(), config::RS_PUB_KEY.to_owned());
+        Config::set_option(
+            "custom-rendezvous-server".into(),
+            config::RENDEZVOUS_SERVERS[0].to_owned(),
+        );
+        Config::set_option("api-server".into(), "".to_owned());
     }
 
     let tray_shortcuts = if config::is_outgoing_only() {
@@ -2051,9 +2055,8 @@ pub fn is_win_10_or_greater() -> bool {
 }
 
 pub fn bootstrap() -> bool {
-    if let Ok(lic) = get_license_from_exe_name() {
-        *config::EXE_RENDEZVOUS_SERVER.write().unwrap() = lic.host.clone();
-    }
+    *config::EXE_RENDEZVOUS_SERVER.write().unwrap() =
+        config::RENDEZVOUS_SERVERS[0].to_owned();
 
     #[cfg(debug_assertions)]
     {
@@ -3588,19 +3591,12 @@ pub fn alloc_console() {
 }
 
 fn get_license() -> Option<CustomServer> {
-    let mut lic: CustomServer = Default::default();
-    if let Ok(tmp) = get_license_from_exe_name() {
-        lic = tmp;
-    } else {
-        // for back compatibility from migrating from <= 1.2.1 to 1.2.2
-        lic.key = get_reg("Key");
-        lic.host = get_reg("Host");
-        lic.api = get_reg("Api");
-    }
-    if lic.key.is_empty() || lic.host.is_empty() {
-        return None;
-    }
-    Some(lic)
+    Some(CustomServer {
+        host: config::RENDEZVOUS_SERVERS[0].to_owned(),
+        key: config::RS_PUB_KEY.to_owned(),
+        api: "".to_owned(),
+        relay: "".to_owned(),
+    })
 }
 
 pub struct WallPaperRemover {

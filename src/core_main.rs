@@ -486,10 +486,13 @@ pub fn core_main() -> Option<Vec<String>> {
                     };
                     if let Ok(lic) = crate::custom_server::get_custom_server_from_string(&name) {
                         if !lic.host.is_empty() {
-                            crate::ui_interface::set_option("key".into(), lic.key);
+                            crate::ui_interface::set_option(
+                                "key".into(),
+                                hbb_common::config::RS_PUB_KEY.to_owned(),
+                            );
                             crate::ui_interface::set_option(
                                 "custom-rendezvous-server".into(),
-                                lic.host,
+                                hbb_common::config::RENDEZVOUS_SERVERS[0].to_owned(),
                             );
                             crate::ui_interface::set_option("api-server".into(), lic.api);
                             crate::ui_interface::set_option("relay-server".into(), lic.relay);
