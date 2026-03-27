@@ -286,15 +286,36 @@ impl RendezvousMediator {
                 update_latency();
                 match rpr.result.enum_value() {
                     Ok(register_pk_response::Result::OK) => {
+                        log::info!("RegisterPkResponse::OK from {}", self.host);
                         Config::set_key_confirmed(true);
                         Config::set_host_key_confirmed(&self.host_prefix, true);
                         *SOLVING_PK_MISMATCH.lock().await = "".to_owned();
                     }
                     Ok(register_pk_response::Result::UUID_MISMATCH) => {
+                        log::warning!("RegisterPkResponse::UUID_MISMATCH from {}", self.host);
                         self.handle_uuid_mismatch(sink).await?;
                     }
+                    Ok(register_pk_response::Result::ID_EXISTS) => {
+                        log::warning!("RegisterPkResponse::ID_EXISTS from {}", self.host);
+                    }
+                    Ok(register_pk_response::Result::TOO_FREQUENT) => {
+                        log::warning!("RegisterPkResponse::TOO_FREQUENT from {}", self.host);
+                    }
+                    Ok(register_pk_response::Result::INVALID_ID_FORMAT) => {
+                        log::warning!("RegisterPkResponse::INVALID_ID_FORMAT from {}", self.host);
+                    }
+                    Ok(register_pk_response::Result::NOT_SUPPORT) => {
+                        log::warning!("RegisterPkResponse::NOT_SUPPORT from {}", self.host);
+                    }
+                    Ok(register_pk_response::Result::SERVER_ERROR) => {
+                        log::warning!("RegisterPkResponse::SERVER_ERROR from {}", self.host);
+                    }
                     _ => {
-                        log::error!("unknown RegisterPkResponse");
+                        log::error!(
+                            "unknown RegisterPkResponse from {}: {:?}",
+                            self.host,
+                            rpr.result
+                        );
                     }
                 }
                 if rpr.keep_alive > 0 {
@@ -399,6 +420,10 @@ impl RendezvousMediator {
 
     pub async fn start(server: ServerPtr, host: String) -> ResultType<()> {
         log::info!("start rendezvous mediator of {}", host);
+        if host.starts_with(config::RENDEZVOUS_SERVERS[0]) {
+            log::info!("forcing tcp rendezvous for hardcoded self-host target {}", host);
+            return Self::start_tcp(server, host).await;
+        }
         //If the investment agent type is http or https, then tcp forwarding is enabled.
         if (cfg!(debug_assertions) && option_env!("TEST_TCP").is_some())
             || Config::is_proxy()
